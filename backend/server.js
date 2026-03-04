@@ -5,9 +5,11 @@ require("dotenv").config();
 
 const app = express();
 const authRoutes = require("./routes/authRoutes");
+const testRoutes = require("./routes/testRoutes");
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/test", testRoutes);
 
 app.get("/", (req, res) => {
   res.send("Adaptive Learning Platform API Running");
