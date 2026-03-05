@@ -74,7 +74,23 @@ correct++
 
 setScore(correct)
 
+const cleanSubject = subject.trim()
+
 const percentage = Math.round((correct/questions.length)*100)
+
+/* SAVE TEST HISTORY */
+
+let history = JSON.parse(localStorage.getItem("testHistory")) || []
+
+history.push({
+subject: cleanSubject,
+score: correct,
+total: questions.length,
+percentage: percentage,
+date: new Date().toLocaleString()
+})
+
+localStorage.setItem("testHistory", JSON.stringify(history))
 
 /* PERFECT SCORE CASE */
 
@@ -85,19 +101,26 @@ return
 
 try{
 
-const cleanSubject = subject.trim()
-
 const res = await API.post("/roadmap/generate",{
 questions,
 answers,
 subject: cleanSubject
 })
 
-const roadmapText = res.data.roadmap
+const roadmapText = res.data?.roadmap
+
+if(!roadmapText){
+console.log("No roadmap returned from API")
+return
+}
+
+/* LOAD EXISTING ROADMAPS */
 
 let existing = JSON.parse(localStorage.getItem("roadmaps")) || []
 
 const normalized = cleanSubject.toLowerCase()
+
+/* CHECK IF SUBJECT EXISTS */
 
 const index = existing.findIndex(
 r => r.subject.toLowerCase() === normalized
@@ -106,14 +129,18 @@ r => r.subject.toLowerCase() === normalized
 const newRoadmap = {
 subject: cleanSubject,
 roadmap: roadmapText,
-date: new Date().toISOString()
+date: new Date().toLocaleString()
 }
+
+/* UPDATE OR ADD */
 
 if(index !== -1){
 existing[index] = newRoadmap
 }else{
 existing.push(newRoadmap)
 }
+
+/* SAVE */
 
 localStorage.setItem("roadmaps", JSON.stringify(existing))
 

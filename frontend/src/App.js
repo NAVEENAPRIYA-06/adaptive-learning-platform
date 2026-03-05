@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import TestPage from "./pages/TestPage";
 import RoadmapPage from "./pages/RoadmapPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 <h1 className="text-4xl text-green-500">Tailwind Working</h1>
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/test" element={<TestPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Routes>
     </BrowserRouter>
   );
