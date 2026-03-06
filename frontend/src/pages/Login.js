@@ -1,5 +1,6 @@
 import { useState } from "react";
 import API from "../services/api";
+import { Link } from "react-router-dom";
 
 export default function Login() {
 
@@ -10,9 +11,31 @@ export default function Login() {
 
     try{
 
-      await API.post("/auth/login",{email,password})
+      const res = await API.post("/auth/login",{email,password})
 
-      window.location.href="/dashboard"
+      const {token,user} = res.data
+
+      /* SAVE TOKEN */
+
+      localStorage.setItem("token",token)
+
+      /* SAVE USER */
+
+      localStorage.setItem("user",JSON.stringify(user))
+
+      /* ROLE BASED REDIRECT */
+
+      if(user.role === "admin"){
+        window.location.href="/admin"
+      }
+
+      else if(user.role === "instructor"){
+        window.location.href="/instructor"
+      }
+
+      else{
+        window.location.href="/dashboard"
+      }
 
     }catch{
 
@@ -77,7 +100,10 @@ export default function Login() {
           </button>
 
           <p className="text-sm mt-4 text-gray-500">
-            Don't have an account? Create one
+            Don't have an account?{" "}
+            <Link to="/register" className="text-green-600 font-semibold hover:underline">
+              Create one
+            </Link>
           </p>
 
         </div>

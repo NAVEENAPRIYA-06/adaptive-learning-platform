@@ -1,173 +1,261 @@
-import Sidebar from "../components/Sidebar";
+import { useEffect, useState } from "react"
+import Layout from "../components/Layout"
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts";
+LineChart,
+Line,
+XAxis,
+YAxis,
+Tooltip,
+CartesianGrid,
+ResponsiveContainer
+} from "recharts"
 
-const data = [
-  { day: "Sat", value: 2 },
-  { day: "Sun", value: 3 },
-  { day: "Mon", value: 2 },
-  { day: "Tue", value: 4 },
-  { day: "Wed", value: 3 },
-  { day: "Thu", value: 5 },
-  { day: "Fri", value: 4 }
-];
+export default function DashboardPage(){
 
-export default function Dashboard() {
+const [history,setHistory] = useState([])
+const [roadmaps,setRoadmaps] = useState([])
 
-  return (
+const [xp,setXp] = useState(0)
+const [streak,setStreak] = useState(0)
 
-    <div className="flex bg-gray-100 min-h-screen">
+useEffect(()=>{
 
-      <Sidebar />
+const testHistory = JSON.parse(localStorage.getItem("testHistory")) || []
+const roadmapData = JSON.parse(localStorage.getItem("roadmaps")) || []
 
-      {/* MAIN CONTENT */}
+setHistory(testHistory)
+setRoadmaps(roadmapData)
 
-      <div className="flex-1 p-8">
+/* LOAD XP */
 
-        {/* Greeting Banner */}
+const xpPoints = Number(localStorage.getItem("xp")) || 0
+setXp(xpPoints)
 
-        <div className="bg-green-400 text-white p-6 rounded-xl flex justify-between items-center">
+/* LOAD STREAK */
 
-          <div>
-            <h2 className="text-2xl font-semibold">
-              Hi Student!
-            </h2>
+const streakData = JSON.parse(localStorage.getItem("streak")) || {count:0}
+setStreak(streakData.count)
 
-            <p>
-              Start your AI learning journey today.
-            </p>
-          </div>
+},[])
 
-          <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-            className="w-20"
-            alt="student"
-          />
+/* STATS */
 
-        </div>
+const totalTests = history.length
 
-        {/* STAT CARDS */}
+const averageScore = history.length
+? Math.round(history.reduce((s,h)=>s+h.percentage,0)/history.length)
+: 0
 
-        <div className="grid grid-cols-3 gap-6 mt-6">
+const bestScore = history.length
+? Math.max(...history.map(h=>h.percentage))
+: 0
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-gray-600">Learning Time</h3>
-            <p className="text-2xl font-bold text-green-600">
-              2h 35m
-            </p>
-          </div>
+/* COUNT WEAK TOPICS */
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-gray-600">Tests Taken</h3>
-            <p className="text-2xl font-bold text-blue-500">
-              5
-            </p>
-          </div>
+const weakTopics = roadmaps.reduce((count,r)=>{
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3 className="text-gray-600">Courses</h3>
-            <p className="text-2xl font-bold text-purple-500">
-              3
-            </p>
-          </div>
+const lines = r.roadmap?.split("\n") || []
 
-        </div>
+return count + lines.filter(l=>l.startsWith("-")).length
 
-        {/* ACTIVITY GRAPH */}
-        {/* MY COURSES */}
+},0)
 
-<div className="bg-white p-6 rounded-xl shadow mt-6">
 
-<h3 className="text-lg font-semibold mb-4">
-My Courses
+/* AI RECOMMENDED TOPICS */
+
+const recommendedTopics = []
+
+roadmaps.forEach(r => {
+
+const lines = r.roadmap?.split("\n") || []
+
+lines.forEach(line => {
+
+if(line.startsWith("-")){
+recommendedTopics.push(line.replace("- ",""))
+}
+
+})
+
+})
+
+const uniqueRecommendations = [...new Set(recommendedTopics)].slice(0,5)
+
+
+/* DAILY AI STUDY PLAN */
+
+let studyPlan = uniqueRecommendations.slice(0,3).map((topic,i)=>({
+topic,
+time: i===0 ? "30 mins" : i===1 ? "40 mins" : "20 mins"
+}))
+
+studyPlan.push({
+topic:"Practice Quiz",
+time:"10 mins"
+})
+
+
+/* SKILL LEVEL */
+
+let skill="Beginner"
+
+if(averageScore>=80) skill="Advanced 🚀"
+else if(averageScore>=60) skill="Intermediate 👍"
+
+/* XP LEVEL SYSTEM */
+
+let level = 1
+
+if(xp > 1000) level = 5
+else if(xp > 600) level = 4
+else if(xp > 300) level = 3
+else if(xp > 150) level = 2
+
+/* CHART DATA */
+
+const progressData = history.map((test,i)=>({
+name:`Test ${i+1}`,
+score:test.percentage
+}))
+
+return(
+
+<Layout>
+
+{/* HERO HEADER */}
+
+<div className="bg-gradient-to-r from-green-500 to-emerald-600 p-8 rounded-2xl text-white shadow mb-10">
+
+<h1 className="text-3xl font-bold mb-2">
+Welcome Back 👋
+</h1>
+
+<p className="opacity-90">
+Continue improving your AI skills today.
+</p>
+
+</div>
+
+
+{/* STAT CARDS */}
+
+<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6 mb-10">
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">Tests Taken</p>
+<p className="text-3xl font-bold text-green-600 mt-2">{totalTests}</p>
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">Average Score</p>
+<p className="text-3xl font-bold text-green-600 mt-2">{averageScore}%</p>
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">Best Score</p>
+<p className="text-3xl font-bold text-green-600 mt-2">{bestScore}%</p>
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">Weak Topics</p>
+<p className="text-3xl font-bold text-red-500 mt-2">{weakTopics}</p>
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">XP Points</p>
+<p className="text-3xl font-bold text-emerald-600 mt-2">{xp}</p>
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">Learning Streak</p>
+<p className="text-3xl font-bold text-orange-500 mt-2">🔥 {streak}</p>
+</div>
+
+<div className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+<p className="text-gray-500 text-sm">Learner Level</p>
+<p className="text-3xl font-bold text-purple-600 mt-2">⭐ {level}</p>
+</div>
+
+</div>
+
+
+{/* MAIN GRID */}
+
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+
+{/* PROGRESS CHART */}
+
+<div className="lg:col-span-2 bg-white p-6 rounded-xl shadow">
+
+<h3 className="text-xl font-semibold mb-6">
+Learning Progress
+</h3>
+
+{history.length===0 ?(
+
+<p className="text-gray-500">
+Take a diagnostic test to begin learning.
+</p>
+
+):( 
+
+<ResponsiveContainer width="100%" height={260}>
+
+<LineChart data={progressData}>
+
+<CartesianGrid strokeDasharray="3 3"/>
+
+<XAxis dataKey="name"/>
+
+<YAxis domain={[0,100]}/>
+
+<Tooltip/>
+
+<Line
+type="monotone"
+dataKey="score"
+stroke="#16a34a"
+strokeWidth={3}
+/>
+
+</LineChart>
+
+</ResponsiveContainer>
+
+)}
+
+</div>
+
+
+{/* LEARNING INSIGHTS */}
+
+<div className="bg-white p-6 rounded-xl shadow">
+
+<h3 className="text-xl font-semibold mb-6">
+Learning Insights
 </h3>
 
 <div className="space-y-6">
 
-{/* Course 1 */}
-
-<div className="flex justify-between items-center">
+<div>
+<p className="text-gray-500 text-sm">Skill Level</p>
+<p className="text-xl font-bold">{skill}</p>
+</div>
 
 <div>
-<h4 className="font-semibold">
-AI Fundamentals
-</h4>
-
-<div className="w-64 bg-gray-200 rounded-full h-2 mt-2">
-
-<div className="bg-green-500 h-2 rounded-full w-[40%]"></div>
-
+<p className="text-gray-500 text-sm">Courses Learning</p>
+<p className="text-xl font-bold">{roadmaps.length}</p>
 </div>
-
-</div>
-
-<div className="text-sm text-gray-600">
-4.5 ⭐
-</div>
-
-<button className="bg-green-500 text-white px-4 py-2 rounded-lg">
-View Course
-</button>
-
-</div>
-
-{/* Course 2 */}
-
-<div className="flex justify-between items-center">
 
 <div>
-<h4 className="font-semibold">
-Machine Learning Basics
-</h4>
-
-<div className="w-64 bg-gray-200 rounded-full h-2 mt-2">
-
-<div className="bg-blue-500 h-2 rounded-full w-[25%]"></div>
-
+<p className="text-gray-500 text-sm">Average Score</p>
+<p className="text-xl font-bold text-green-600">{averageScore}%</p>
 </div>
-
-</div>
-
-<div className="text-sm text-gray-600">
-4.3 ⭐
-</div>
-
-<button className="bg-green-500 text-white px-4 py-2 rounded-lg">
-View Course
-</button>
-
-</div>
-
-{/* Course 3 */}
-
-<div className="flex justify-between items-center">
 
 <div>
-<h4 className="font-semibold">
-Deep Learning Introduction
-</h4>
-
-<div className="w-64 bg-gray-200 rounded-full h-2 mt-2">
-
-<div className="bg-purple-500 h-2 rounded-full w-[60%]"></div>
-
+<p className="text-gray-500 text-sm">XP Earned</p>
+<p className="text-xl font-bold text-emerald-600">{xp}</p>
 </div>
-
-</div>
-
-<div className="text-sm text-gray-600">
-4.6 ⭐
-</div>
-
-<button className="bg-green-500 text-white px-4 py-2 rounded-lg">
-View Course
-</button>
 
 </div>
 
@@ -175,53 +263,145 @@ View Course
 
 </div>
 
-        <div className="bg-white p-6 rounded-xl shadow mt-6">
 
-          <h3 className="mb-4 text-lg font-semibold">
-            My Activity
-          </h3>
+{/* COURSES */}
 
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={data}>
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="value" stroke="#22c55e" />
-            </LineChart>
-          </ResponsiveContainer>
+<div className="bg-white p-6 rounded-xl shadow mb-10">
 
-        </div>
+<h3 className="text-xl font-semibold mb-6">
+Your Courses
+</h3>
 
-      </div>
+{roadmaps.length===0 ?(
 
-      {/* RIGHT PANEL */}
+<p className="text-gray-500">
+No courses started yet
+</p>
 
-      <div className="w-72 p-6 bg-white shadow">
+):( 
 
-        <h3 className="text-lg font-semibold mb-4">
-          Upcoming Tasks
-        </h3>
+<div className="grid md:grid-cols-3 gap-6">
 
-        <div className="space-y-4">
+{roadmaps.map((course,i)=>(
 
-          <div className="bg-gray-100 p-3 rounded">
-            Discussion Algorithm
-          </div>
+<div
+key={i}
+className="border rounded-xl p-5 hover:shadow-lg transition"
+>
 
-          <div className="bg-gray-100 p-3 rounded">
-            Complete Practice Quiz
-          </div>
+<p className="font-semibold mb-3">
+📚 {course.subject}
+</p>
 
-          <div className="bg-gray-100 p-3 rounded">
-            Review Weak Topics
-          </div>
+<div className="w-full bg-gray-200 h-2 rounded mb-2">
 
-        </div>
+<div
+className="bg-green-500 h-2 rounded"
+style={{width:`${Math.min(averageScore,100)}%`}}
+/>
 
-      </div>
+</div>
 
-    </div>
+<p className="text-sm text-gray-500">
+Learning in progress
+</p>
 
-  );
+</div>
+
+))}
+
+</div>
+
+)}
+
+</div>
+
+
+{/* AI RECOMMENDATIONS */}
+
+<div className="bg-white p-6 rounded-xl shadow mb-10">
+
+<h3 className="text-xl font-semibold mb-6">
+🤖 AI Recommended Next Topics
+</h3>
+
+{uniqueRecommendations.length === 0 ?(
+
+<p className="text-gray-500">
+Take more diagnostic tests to receive AI recommendations.
+</p>
+
+):( 
+
+<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+{uniqueRecommendations.map((topic,i)=>(
+
+<div
+key={i}
+className="border border-green-200 bg-green-50 p-4 rounded-lg hover:shadow transition"
+>
+
+<p className="font-medium text-green-700">
+{topic}
+</p>
+
+</div>
+
+))}
+
+</div>
+
+)}
+
+</div>
+
+
+{/* DAILY STUDY PLAN */}
+
+<div className="bg-white p-6 rounded-xl shadow">
+
+<h3 className="text-xl font-semibold mb-6">
+🧠 Today's AI Study Plan
+</h3>
+
+{studyPlan.length === 0 ?(
+
+<p className="text-gray-500">
+Take diagnostic tests to generate a personalized study plan.
+</p>
+
+):( 
+
+<div className="space-y-4">
+
+{studyPlan.map((item,i)=>(
+
+<div
+key={i}
+className="flex justify-between items-center border p-4 rounded-lg hover:shadow transition"
+>
+
+<div className="font-medium text-gray-700">
+{i+1}. {item.topic}
+</div>
+
+<div className="text-sm text-green-600 font-semibold">
+{item.time}
+</div>
+
+</div>
+
+))}
+
+</div>
+
+)}
+
+</div>
+
+</Layout>
+
+)
 
 }

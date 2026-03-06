@@ -92,6 +92,40 @@ date: new Date().toLocaleString()
 
 localStorage.setItem("testHistory", JSON.stringify(history))
 
+/* XP SYSTEM */
+
+let xp = Number(localStorage.getItem("xp")) || 0
+
+xp += 50
+
+if(correct/questions.length >= 0.7){
+xp += 20
+}
+
+if(correct === questions.length){
+xp += 50
+}
+
+localStorage.setItem("xp", xp)
+
+/* DAILY STREAK */
+
+let streakData = JSON.parse(localStorage.getItem("streak")) || {
+count:0,
+lastDate:null
+}
+
+const today = new Date().toDateString()
+
+if(streakData.lastDate !== today){
+
+streakData.count += 1
+streakData.lastDate = today
+
+localStorage.setItem("streak", JSON.stringify(streakData))
+
+}
+
 /* PERFECT SCORE CASE */
 
 if(percentage === 100){
