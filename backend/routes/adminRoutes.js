@@ -110,4 +110,38 @@ message:"Failed to delete user"
 
 })
 
+/* =========================
+UPDATE USER ROLE
+========================= */
+
+router.put("/users/:id/role", async (req,res)=>{
+
+try{
+
+const {role} = req.body
+
+const user = await User.findByIdAndUpdate(
+
+req.params.id,
+
+{role},
+
+{new:true}
+
+)
+
+res.json(user)
+
+}catch(err){
+
+console.log(err)
+
+res.status(500).json({
+message:"Failed to update role"
+})
+
+}
+
+})
+
 module.exports = router
