@@ -1,8 +1,9 @@
+
 const express = require("express");
 const router = express.Router();
 
 const generateQuestions = require("../ai/aiGenerator");
-
+const TestResult = require("../models/TestResult")
 router.post("/generate", async (req, res) => {
 
   try {

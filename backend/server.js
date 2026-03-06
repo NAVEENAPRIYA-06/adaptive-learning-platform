@@ -7,12 +7,15 @@ const app = express();
 const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
 const roadmapRoutes = require("./routes/roadmapRoutes");
+const aiRoutes = require("./routes/aiRoutes")
+const adminRoutes = require("./routes/adminRoutes")
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/roadmap", roadmapRoutes);
-
+app.use("/api/ai", aiRoutes)
+app.use("/api/admin", adminRoutes)
 app.get("/", (req, res) => {
   res.send("Adaptive Learning Platform API Running");
 });
