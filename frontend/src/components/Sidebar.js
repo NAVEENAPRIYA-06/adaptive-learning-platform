@@ -43,9 +43,9 @@ const instructorMenu = [
 
 const adminMenu = [
 { name:"Admin Dashboard", path:"/admin", icon:LayoutDashboard },
-{ name:"Users", path:"/users", icon:Users },
-{ name:"Platform Analytics", path:"/analytics", icon:BarChart3 },
-{ name:"Profile", path:"/profile", icon:User }
+{ name:"User Management", path:"/users", icon:Users },
+{ name:"System Analytics", path:"/admin-analytics", icon:BarChart3 },
+{ name:"Activity Logs", path:"/admin-logs", icon:ClipboardList }
 ]
 
 /* SELECT MENU */

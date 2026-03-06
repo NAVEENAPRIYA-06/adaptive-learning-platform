@@ -13,6 +13,9 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import ChatPage from "./pages/ChatPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminUsers from "./pages/AdminUsers"
+import AdminAnalytics from "./pages/AdminAnalytics"
+import AdminLogs from "./pages/AdminLogs"
+import AdminProfile from "./pages/AdminProfile"
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -108,6 +111,33 @@ path="/users"
 element={
 <ProtectedRoute>
 <AdminUsers/>
+</ProtectedRoute>
+}
+/>
+
+<Route
+path="/admin-analytics"
+element={
+<ProtectedRoute>
+<AdminAnalytics/>
+</ProtectedRoute>
+}
+/>
+
+<Route
+path="/admin-logs"
+element={
+<ProtectedRoute>
+<AdminLogs/>
+</ProtectedRoute>
+}
+/>
+
+<Route
+path="/admin-profile"
+element={
+<ProtectedRoute>
+<AdminProfile/>
 </ProtectedRoute>
 }
 />
